@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shift Whisper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a222d;
+      --surface-2: #243040;
+      --border: #2d3a4d;
+      --text: #e8eef6;
+      --text-muted: #8b9bb4;
+      --accent: #5b9fd4;
+      --accent-soft: rgba(91, 159, 212, 0.15);
+      --energy: #6bcb77;
+      --stress: #f4a261;
+      --team: #a78bfa;
+      --company: #38bdf8;
+      --success: #4ade80;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      padding: 20px 18px 28px;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .logo {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 14px 28px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0f14;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* ========== HOME ========== */
+    #home .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 28px;
+    }
+
+    .hero-icon {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.3rem;
+    }
+
+    .choice-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .choice-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 18px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .choice-card:hover {
+      border-color: var(--accent);
+      background: var(--surface-2);
+    }
+
+    .choice-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .choice-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ========== CHECK-IN ========== */
+    .scale-group {
+      margin-bottom: 20px;
+    }
+
+    .scale-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .scale-label h3 {
+      font-size: 0.98rem;
+      font-weight: 600;
+    }
+
+    .scale-label .sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .scale-label span.value-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .scale-options {
+      display: flex;
+      gap: 7px;
+    }
+
+    .scale-btn {
+      flex: 1;
+      aspect-ratio: 1;
+      max-height: 56px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.35rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scale-btn:hover {
+      border-color: var(--text-muted);
+    }
+
+    .scale-btn.selected {
+      transform: scale(1.06);
+    }
+
+    .scale-btn[data-scale="energy"].selected { border-color: var(--energy); background: rgba(107, 203, 119, 0.15); }
+    .scale-btn[data-scale="stress"].selected { border-color: var(--stress); background: rgba(244, 162, 97, 0.15); }
+    .scale-btn[data-scale="team"].selected { border-color: var(--team); background: rgba(167, 139, 250, 0.15); }
+    .scale-btn[data-scale="company"].selected { border-color: var(--company); background: rgba(56, 189, 248, 0.15); }
+
+    .note-area {
+      margin-bottom: 20px;
+    }
+
+    .note-area label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .note-area textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.92rem;
+      padding: 11px 13px;
+      resize: none;
+      height: 64px;
+      transition: border-color 0.2s;
+    }
+
+    .note-area textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .note-area textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .submit-area {
+      margin-top: auto;
+      padding-top: 8px;
+    }
+
+    /* ========== THANKS ========== */
+    #thanks {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .thanks-icon {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: rgba(74, 222, 128, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 18px;
+    }
+
+    #thanks h2 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    #thanks p {
+      color: var(--text-muted);
+      max-width: 280px;
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+    }
+
+    /* ========== MANAGER ========== */
+    .manager-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .manager-header h1 {
+      font-size: 1.35rem;
+    }
+
+    .pulse-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .pulse-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .pulse-card .label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .pulse-card .value {
+      font-size: 1.65rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .pulse-card .sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .pulse-card.energy .value { color: var(--energy); }
+    .pulse-card.stress .value { color: var(--stress); }
+    .pulse-card.team .value { color: var(--team); }
+    .pulse-card.company .value { color: var(--company); }
+
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .suggestions {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 24px;
+    }
+
+    .suggestion {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .suggestion:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .suggestion:first-child {
+      padding-top: 0;
+    }
+
+    .suggestion-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .suggestion p {
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .note-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 13px;
+      font-size: 0.88rem;
+    }
+
+    .note-card .meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px 14px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      margin-bottom: 12px;
+    }
+
+    .back-link:hover {
+      color: var(--text);
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .stats-row strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 380px) {
+      .scale-btn { font-size: 1.2rem; max-height: 50px; }
+      .pulse-card .value { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- HOME -->
+    <div id="home" class="view active">
+      <div class="hero">
+        <div>
+          <div class="logo">Shift Whisper</div>
+          <div class="hero-icon">🌙</div>
+          <h1 style="margin-top:14px;font-size:1.6rem;">How’s the shift<br>feeling?</h1>
+          <p style="margin-top:8px;color:var(--text-muted);max-width:260px;margin-left:auto;margin-right:auto;font-size:0.92rem;">
+            A quiet 12-second check-in. No names. No pressure.
+          </p>
+        </div>
+
+        <div class="choice-cards">
+          <div class="choice-card" onclick="showView('checkin')">
+            <h3>I’m on shift</h3>
+            <p>Quick energy, stress & morale check</p>
+          </div>
+          <div class="choice-card" onclick="showView('manager')">
+            <h3>View the pulse</h3>
+            <p>Anonymous team overview for leads</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECK-IN -->
+    <div id="checkin" class="view">
+      <button class="back-link" onclick="showView('home')">← Back</button>
+      <div class="header">
+        <div class="logo">Shift Whisper</div>
+        <h1>How’s this shift?</h1>
+        <p>Four quick taps. Optional note.</p>
+      </div>
+
+      <!-- Energy -->
+      <div class="scale-group">
+        <div class="scale-label">
+          <h3>Energy</h3>
+          <span class="value-label" id="energy-label">—</span>
+        </div>
+        <div class="scale-options">
+          <button class="scale-btn" data-scale="energy" data-value="1" onclick="selectScale(this)">😩</button>
+          <button class="scale-btn" data-scale="energy" data-value="2" onclick="selectScale(this)">😕</button>
+          <button class="scale-btn" data-scale="energy" data-value="3" onclick="selectScale(this)">😐</button>
+          <button class="scale-btn" data-scale="energy" data-value="4" onclick="selectScale(this)">🙂</button>
+          <button class="scale-btn" data-scale="energy" data-value="5" onclick="selectScale(this)">⚡</button>
+        </div>
+      </div>
+
+      <!-- Stress -->
+      <div class="scale-group">
+        <div class="scale-label">
+          <h3>Stress / Load</h3>
+          <span class="value-label" id="stress-label">—</span>
+        </div>
+        <div class="scale-options">
+          <button class="scale-btn" data-scale="stress" data-value="1" onclick="selectScale(this)">🍃</button>
+          <button class="scale-btn" data-scale="stress" data-value="2" onclick="selectScale(this)">🌤️</button>
+          <button class="scale-btn" data-scale="stress" data-value="3" onclick="selectScale(this)">⛅</button>
+          <button class="scale-btn" data-scale="stress" data-value="4" onclick="selectScale(this)">🌧️</button>
+          <button class="scale-btn" data-scale="stress" data-value="5" onclick="selectScale(this)">⛈️</button>
+        </div>
+      </div>
+
+      <!-- Team Morale -->
+      <div class="scale-group">
+        <div class="scale-label">
+          <div>
+            <h3>Team Morale</h3>
+            <div class="sub">Your immediate crew / shift</div>
+          </div>
+          <span class="value-label" id="team-label">—</span>
+        </div>
+        <div class="scale-options">
+          <button class="scale-btn" data-scale="team" data-value="1" onclick="selectScale(this)">🫥</button>
+          <button class="scale-btn" data-scale="team" data-value="2" onclick="selectScale(this)">🤝</button>
+          <button class="scale-btn" data-scale="team" data-value="3" onclick="selectScale(this)">💬</button>
+          <button class="scale-btn" data-scale="team" data-value="4" onclick="selectScale(this)">🔥</button>
+          <button class="scale-btn" data-scale="team" data-value="5" onclick="selectScale(this)">✨</button>
+        </div>
+      </div>
+
+      <!-- Company Morale -->
+      <div class="scale-group">
+        <div class="scale-label">
+          <div>
+            <h3>Company Morale</h3>
+            <div class="sub">The wider organization</div>
+          </div>
+          <span class="value-label" id="company-label">—</span>
+        </div>
+        <div class="scale-options">
+          <button class="scale-btn" data-scale="company" data-value="1" onclick="selectScale(this)">📉</button>
+          <button class="scale-btn" data-scale="company" data-value="2" onclick="selectScale(this)">😕</button>
+          <button class="scale-btn" data-scale="company" data-value="3" onclick="selectScale(this)">😐</button>
+          <button class="scale-btn" data-scale="company" data-value="4" onclick="selectScale(this)">👍</button>
+          <button class="scale-btn" data-scale="company" data-value="5" onclick="selectScale(this)">🚀</button>
+        </div>
+      </div>
+
+      <!-- Optional note -->
+      <div class="note-area">
+        <label for="note">Anything the team should know? <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+        <textarea id="note" maxlength="60" placeholder="e.g. short-staffed on bar, new hire crushing it…" oninput="updateCharCount()"></textarea>
+        <div class="char-count"><span id="char-count">0</span>/60</div>
+      </div>
+
+      <div class="submit-area">
+        <button class="btn btn-primary btn-block" id="submit-btn" onclick="submitCheckin()" disabled>
+          Send whisper
+        </button>
+      </div>
+    </div>
+
+    <!-- THANKS -->
+    <div id="thanks" class="view">
+      <div class="thanks-icon">✓</div>
+      <h2>Got it. Thanks.</h2>
+      <p>Your whisper is anonymous and only visible as part of the team pulse.</p>
+      <button class="btn btn-primary" onclick="showView('home')">Done</button>
+    </div>
+
+    <!-- MANAGER -->
+    <div id="manager" class="view">
+      <button class="back-link" onclick="showView('home')">← Back</button>
+      
+      <div class="manager-header">
+        <h1>Team Pulse</h1>
+      </div>
+
+      <div class="stats-row">
+        <span><strong id="total-whispers">0</strong> whispers</span>
+        <span>•</span>
+        <span>Last 24h</span>
+      </div>
+
+      <div class="pulse-grid">
+        <div class="pulse-card energy">
+          <div class="label">Energy</div>
+          <div class="value" id="avg-energy">—</div>
+          <div class="sub" id="energy-desc">—</div>
+        </div>
+        <div class="pulse-card stress">
+          <div class="label">Stress</div>
+          <div class="value" id="avg-stress">—</div>
+          <div class="sub" id="stress-desc">—</div>
+        </div>
+        <div class="pulse-card team">
+          <div class="label">Team Morale</div>
+          <div class="value" id="avg-team">—</div>
+          <div class="sub" id="team-desc">—</div>
+        </div>
+        <div class="pulse-card company">
+          <div class="label">Company Morale</div>
+          <div class="value" id="avg-company">—</div>
+          <div class="sub" id="company-desc">—</div>
+        </div>
+      </div>
+
+      <div class="section-title">Suggested actions</div>
+      <div class="suggestions" id="suggestions">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="section-title">Recent notes</div>
+      <div class="notes-list" id="notes-list">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ========== STATE ==========
+    const state = {
+      energy: null,
+      stress: null,
+      team: null,
+      company: null
+    };
+
+    const labels = {
+      energy: ['Drained', 'Low', 'Okay', 'Good', 'Charged'],
+      stress: ['Light', 'Mild', 'Moderate', 'Heavy', 'Intense'],
+      team: ['Isolated', 'Quiet', 'Okay', 'Solid', 'Electric'],
+      company: ['Low', 'Uneasy', 'Neutral', 'Positive', 'Strong']
+    };
+
+    // ========== NAVIGATION ==========
+    function showView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+
+      if (id === 'manager') {
+        renderManager();
+      }
+      if (id === 'checkin') {
+        // reset form
+        state.energy = state.stress = state.team = state.company = null;
+        document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('energy-label').textContent = '—';
+        document.getElementById('stress-label').textContent = '—';
+        document.getElementById('team-label').textContent = '—';
+        document.getElementById('company-label').textContent = '—';
+        document.getElementById('note').value = '';
+        document.getElementById('char-count').textContent = '0';
+        document.getElementById('submit-btn').disabled = true;
+      }
+    }
+
+    // ========== CHECK-IN LOGIC ==========
+    function selectScale(btn) {
+      const scale = btn.dataset.scale;
+      const value = parseInt(btn.dataset.value);
+
+      // deselect siblings
+      document.querySelectorAll(`.scale-btn[data-scale="${scale}"]`).forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      state[scale] = value;
+      document.getElementById(`${scale}-label`).textContent = labels[scale][value - 1];
+
+      // enable submit when all four are chosen
+      const ready = state.energy && state.stress && state.team && state.company;
+      document.getElementById('submit-btn').disabled = !ready;
+    }
+
+    function updateCharCount() {
+      const len = document.getElementById('note').value.length;
+      document.getElementById('char-count').textContent = len;
+    }
+
+    function submitCheckin() {
+      if (!state.energy || !state.stress || !state.team || !state.company) return;
+
+      const entry = {
+        id: Date.now(),
+        energy: state.energy,
+        stress: state.stress,
+        team: state.team,
+        company: state.company,
+        note: document.getElementById('note').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      const whispers = getWhispers();
+      whispers.unshift(entry);
+      localStorage.setItem('shiftWhispers', JSON.stringify(whispers.slice(0, 100)));
+
+      showView('thanks');
+    }
+
+    // ========== DATA ==========
+    function getWhispers() {
+      try {
+        return JSON.parse(localStorage.getItem('shiftWhispers')) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function seedIfEmpty() {
+      const existing = getWhispers();
+      if (existing.length > 0) return;
+
+      // Seed with realistic sample data
+      const samples = [
+        { energy: 4, stress: 2, team: 5, company: 4, note: "New person on bar is crushing it", hoursAgo: 1 },
+        { energy: 3, stress: 4, team: 3, company: 3, note: "Short-staffed after 8pm", hoursAgo: 2 },
+        { energy: 2, stress: 4, team: 2, company: 2, note: "", hoursAgo: 3 },
+        { energy: 5, stress: 1, team: 5, company: 4, note: "Quiet night, good team energy", hoursAgo: 4 },
+        { energy: 3, stress: 3, team: 4, company: 3, note: "Kitchen is moving well", hoursAgo: 5 },
+        { energy: 2, stress: 5, team: 2, company: 2, note: "Two call-outs tonight", hoursAgo: 6 },
+        { energy: 4, stress: 2, team: 4, company: 3, note: "", hoursAgo: 8 },
+        { energy: 3, stress: 3, team: 3, company: 2, note: "Training day – bit chaotic", hoursAgo: 10 },
+        { energy: 4, stress: 2, team: 5, company: 4, note: "Regulars were lovely", hoursAgo: 12 },
+        { energy: 1, stress: 5, team: 1, company: 2, note: "Absolutely slammed with no backup", hoursAgo: 14 },
+        { energy: 3, stress: 3, team: 4, company: 3, note: "", hoursAgo: 16 },
+        { energy: 5, stress: 1, team: 5, company: 5, note: "Best shift in weeks", hoursAgo: 18 },
+      ];
+
+      const now = Date.now();
+      const seeded = samples.map((s) => ({
+        id: now - (s.hoursAgo * 3600000),
+        energy: s.energy,
+        stress: s.stress,
+        team: s.team,
+        company: s.company,
+        note: s.note,
+        timestamp: new Date(now - (s.hoursAgo * 3600000)).toISOString()
+      }));
+
+      localStorage.setItem('shiftWhispers', JSON.stringify(seeded));
+    }
+
+    // ========== MANAGER RENDER ==========
+    function renderManager() {
+      seedIfEmpty();
+      const whispers = getWhispers();
+
+      document.getElementById('total-whispers').textContent = whispers.length;
+
+      if (whispers.length === 0) {
+        ['energy','stress','team','company'].forEach(k => {
+          document.getElementById(`avg-${k}`).textContent = '—';
+          document.getElementById(`${k}-desc`).textContent = 'No data';
+        });
+        document.getElementById('suggestions').innerHTML = '<p style="color:var(--text-muted);font-size:0.88rem;">Not enough data yet for suggestions.</p>';
+        document.getElementById('notes-list').innerHTML = '<div class="empty-state">No notes yet. Whispers will appear here.</div>';
+        return;
+      }
+
+      // Averages
+      const avg = (key) => {
+        const sum = whispers.reduce((a, w) => a + w[key], 0);
+        return (sum / whispers.length).toFixed(1);
+      };
+
+      const e = parseFloat(avg('energy'));
+      const s = parseFloat(avg('stress'));
+      const t = parseFloat(avg('team'));
+      const c = parseFloat(avg('company'));
+
+      document.getElementById('avg-energy').textContent = e;
+      document.getElementById('avg-stress').textContent = s;
+      document.getElementById('avg-team').textContent = t;
+      document.getElementById('avg-company').textContent = c;
+
+      document.getElementById('energy-desc').textContent = e >= 4 ? 'Strong' : e >= 3 ? 'Okay' : 'Low';
+      document.getElementById('stress-desc').textContent = s <= 2 ? 'Light' : s <= 3.5 ? 'Moderate' : 'High';
+      document.getElementById('team-desc').textContent = t >= 4 ? 'Good' : t >= 3 ? 'Okay' : 'Quiet';
+      document.getElementById('company-desc').textContent = c >= 4 ? 'Positive' : c >= 3 ? 'Neutral' : 'Low';
+
+      // Suggestions
+      const suggestions = [];
+      if (s >= 3.8) {
+        suggestions.push({ icon: '⚠️', text: 'Stress is running high. Consider checking staffing levels or offering staggered breaks.' });
+      }
+      if (e <= 2.5) {
+        suggestions.push({ icon: '🔋', text: 'Energy is dipping. A mid-shift check-in or lighter task rotation could help.' });
+      }
+      if (t <= 2.5) {
+        suggestions.push({ icon: '🤝', text: 'Team morale feels quiet. A small recognition moment or pairing people up might lift the floor.' });
+      }
+      if (c <= 2.5 && t >= 3.5) {
+        suggestions.push({ icon: '🏢', text: 'Team morale is okay but company morale is low — this often points to bigger org issues (comms, fairness, leadership signals).' });
+      }
+      if (c <= 2.5 && t <= 2.5) {
+        suggestions.push({ icon: '📉', text: 'Both team and company morale are soft. Worth a deeper conversation with the crew.' });
+      }
+      if (t >= 4 && c <= 2.8) {
+        suggestions.push({ icon: '💡', text: 'Strong local team energy but softer company feeling — protect the good crew culture while addressing wider signals.' });
+      }
+      if (e >= 4 && t >= 4 && s <= 2.5 && c >= 3.5) {
+        suggestions.push({ icon: '✨', text: 'Strong across the board — great time to recognize the team or try a small positive experiment.' });
+      }
+      if (suggestions.length === 0) {
+        suggestions.push({ icon: '👀', text: 'Pulse looks balanced. Keep an eye on the notes for early signals.' });
+      }
+
+      document.getElementById('suggestions').innerHTML = suggestions.map(sg => `
+        <div class="suggestion">
+          <span class="suggestion-icon">${sg.icon}</span>
+          <p>${sg.text}</p>
+        </div>
+      `).join('');
+
+      // Notes
+      const notes = whispers.filter(w => w.note && w.note.length > 0).slice(0, 8);
+      if (notes.length === 0) {
+        document.getElementById('notes-list').innerHTML = '<div class="empty-state">No notes shared yet.</div>';
+      } else {
+        document.getElementById('notes-list').innerHTML = notes.map(n => {
+          const time = new Date(n.timestamp);
+          const hours = Math.round((Date.now() - time.getTime()) / 3600000);
+          const timeStr = hours < 1 ? 'Just now' : hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+          return `
+            <div class="note-card">
+              “${n.note}”
+              <div class="meta">${timeStr}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Init
+    seedIfEmpty();
+  </script>
+</body>
+</html>
