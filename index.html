@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Shift Whisper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a222d;
+      --surface-2: #243040;
+      --border: #2d3a4d;
+      --text: #e8eef6;
+      --text-muted: #8b9bb4;
+      --accent: #5b9fd4;
+      --accent-soft: rgba(91, 159, 212, 0.15);
+      --energy: #6bcb77;
+      --stress: #f4a261;
+      --vibe: #a78bfa;
+      --success: #4ade80;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* ========== SHARED ========== */
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      padding: 24px 20px 32px;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      font-size: 1.65rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 14px 28px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0f14;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* ========== HOME ========== */
+    #home .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 32px;
+    }
+
+    .hero-icon {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+    }
+
+    .choice-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .choice-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 20px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .choice-card:hover {
+      border-color: var(--accent);
+      background: var(--surface-2);
+    }
+
+    .choice-card h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .choice-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    /* ========== CHECK-IN ========== */
+    .scale-group {
+      margin-bottom: 28px;
+    }
+
+    .scale-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .scale-label h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .scale-label span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .scale-options {
+      display: flex;
+      gap: 8px;
+    }
+
+    .scale-btn {
+      flex: 1;
+      aspect-ratio: 1;
+      max-height: 64px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scale-btn:hover {
+      border-color: var(--text-muted);
+    }
+
+    .scale-btn.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      transform: scale(1.05);
+    }
+
+    .scale-btn[data-scale="energy"].selected { border-color: var(--energy); background: rgba(107, 203, 119, 0.15); }
+    .scale-btn[data-scale="stress"].selected { border-color: var(--stress); background: rgba(244, 162, 97, 0.15); }
+    .scale-btn[data-scale="vibe"].selected { border-color: var(--vibe); background: rgba(167, 139, 250, 0.15); }
+
+    .note-area {
+      margin-bottom: 28px;
+    }
+
+    .note-area label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .note-area textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 12px 14px;
+      resize: none;
+      height: 72px;
+      transition: border-color 0.2s;
+    }
+
+    .note-area textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .note-area textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .submit-area {
+      margin-top: auto;
+      padding-top: 12px;
+    }
+
+    /* ========== THANKS ========== */
+    #thanks {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .thanks-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(74, 222, 128, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+    }
+
+    #thanks h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    #thanks p {
+      color: var(--text-muted);
+      max-width: 280px;
+      margin-bottom: 32px;
+    }
+
+    /* ========== MANAGER ========== */
+    .manager-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .manager-header h1 {
+      font-size: 1.4rem;
+    }
+
+    .pulse-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .pulse-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 10px;
+      text-align: center;
+    }
+
+    .pulse-card .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .pulse-card .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .pulse-card .sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .pulse-card.energy .value { color: var(--energy); }
+    .pulse-card.stress .value { color: var(--stress); }
+    .pulse-card.vibe .value { color: var(--vibe); }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .suggestions {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 28px;
+    }
+
+    .suggestion {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .suggestion:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .suggestion:first-child {
+      padding-top: 0;
+    }
+
+    .suggestion-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .suggestion p {
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .note-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 0.92rem;
+    }
+
+    .note-card .meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      margin-bottom: 16px;
+    }
+
+    .back-link:hover {
+      color: var(--text);
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .stats-row strong {
+      color: var(--text);
+    }
+
+    /* small screens */
+    @media (max-width: 380px) {
+      .scale-btn { font-size: 1.3rem; }
+      .pulse-card .value { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- HOME -->
+    <div id="home" class="view active">
+      <div class="hero">
+        <div>
+          <div class="logo">Shift Whisper</div>
+          <div class="hero-icon">🌙</div>
+          <h1 style="margin-top:16px;font-size:1.7rem;">How’s the shift<br>feeling?</h1>
+          <p style="margin-top:10px;color:var(--text-muted);max-width:260px;margin-left:auto;margin-right:auto;">
+            A quiet 10-second check-in. No names. No pressure.
+          </p>
+        </div>
+
+        <div class="choice-cards">
+          <div class="choice-card" onclick="showView('checkin')">
+            <h3>I’m on shift</h3>
+            <p>Quick energy, stress & vibe check</p>
+          </div>
+          <div class="choice-card" onclick="showView('manager')">
+            <h3>View the pulse</h3>
+            <p>Anonymous team overview for leads</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECK-IN -->
+    <div id="checkin" class="view">
+      <button class="back-link" onclick="showView('home')">← Back</button>
+      <div class="header">
+        <div class="logo">Shift Whisper</div>
+        <h1>How’s this shift?</h1>
+        <p>Three quick taps. Optional note.</p>
+      </div>
+
+      <!-- Energy -->
+      <div class="scale-group">
+        <div class="scale-label">
+          <h3>Energy</h3>
+          <span id="energy-label">—</span>
+        </div>
+        <div class="scale-options" data-scale="energy">
+          <button class="scale-btn" data-scale="energy" data-value="1" onclick="selectScale(this)">😩</button>
+          <button class="scale-btn" data-scale="energy" data-value="2" onclick="selectScale(this)">😕</button>
+          <button class="scale-btn" data-scale="energy" data-value="3" onclick="selectScale(this)">😐</button>
+          <button class="scale-btn" data-scale="energy" data-value="4" onclick="selectScale(this)">🙂</button>
+          <button class="scale-btn" data-scale="energy" data-value="5" onclick="selectScale(this)">⚡</button>
+        </div>
+      </div>
+
+      <!-- Stress -->
+      <div class="scale-group">
+        <div class="scale-label">
+          <h3>Stress / Load</h3>
+          <span id="stress-label">—</span>
+        </div>
+        <div class="scale-options" data-scale="stress">
+          <button class="scale-btn" data-scale="stress" data-value="1" onclick="selectScale(this)">🍃</button>
+          <button class="scale-btn" data-scale="stress" data-value="2" onclick="selectScale(this)">🌤️</button>
+          <button class="scale-btn" data-scale="stress" data-value="3" onclick="selectScale(this)">⛅</button>
+          <button class="scale-btn" data-scale="stress" data-value="4" onclick="selectScale(this)">🌧️</button>
+          <button class="scale-btn" data-scale="stress" data-value="5" onclick="selectScale(this)">⛈️</button>
+        </div>
+      </div>
+
+      <!-- Team Vibe -->
+      <div class="scale-group">
+        <div class="scale-label">
+          <h3>Team vibe</h3>
+          <span id="vibe-label">—</span>
+        </div>
+        <div class="scale-options" data-scale="vibe">
+          <button class="scale-btn" data-scale="vibe" data-value="1" onclick="selectScale(this)">🫥</button>
+          <button class="scale-btn" data-scale="vibe" data-value="2" onclick="selectScale(this)">🤝</button>
+          <button class="scale-btn" data-scale="vibe" data-value="3" onclick="selectScale(this)">💬</button>
+          <button class="scale-btn" data-scale="vibe" data-value="4" onclick="selectScale(this)">🔥</button>
+          <button class="scale-btn" data-scale="vibe" data-value="5" onclick="selectScale(this)">✨</button>
+        </div>
+      </div>
+
+      <!-- Optional note -->
+      <div class="note-area">
+        <label for="note">Anything the team should know? <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+        <textarea id="note" maxlength="60" placeholder="e.g. short-staffed on bar, new hire crushing it…" oninput="updateCharCount()"></textarea>
+        <div class="char-count"><span id="char-count">0</span>/60</div>
+      </div>
+
+      <div class="submit-area">
+        <button class="btn btn-primary btn-block" id="submit-btn" onclick="submitCheckin()" disabled>
+          Send whisper
+        </button>
+      </div>
+    </div>
+
+    <!-- THANKS -->
+    <div id="thanks" class="view">
+      <div class="thanks-icon">✓</div>
+      <h2>Got it. Thanks.</h2>
+      <p>Your whisper is anonymous and only visible as part of the team pulse.</p>
+      <button class="btn btn-primary" onclick="showView('home')">Done</button>
+    </div>
+
+    <!-- MANAGER -->
+    <div id="manager" class="view">
+      <button class="back-link" onclick="showView('home')">← Back</button>
+      
+      <div class="manager-header">
+        <h1>Team Pulse</h1>
+      </div>
+
+      <div class="stats-row">
+        <span><strong id="total-whispers">0</strong> whispers</span>
+        <span>•</span>
+        <span>Last 24h</span>
+      </div>
+
+      <div class="pulse-grid">
+        <div class="pulse-card energy">
+          <div class="label">Energy</div>
+          <div class="value" id="avg-energy">—</div>
+          <div class="sub" id="energy-desc">—</div>
+        </div>
+        <div class="pulse-card stress">
+          <div class="label">Stress</div>
+          <div class="value" id="avg-stress">—</div>
+          <div class="sub" id="stress-desc">—</div>
+        </div>
+        <div class="pulse-card vibe">
+          <div class="label">Vibe</div>
+          <div class="value" id="avg-vibe">—</div>
+          <div class="sub" id="vibe-desc">—</div>
+        </div>
+      </div>
+
+      <div class="section-title">Suggested actions</div>
+      <div class="suggestions" id="suggestions">
+        <!-- filled by JS -->
+      </div>
+
+      <div class="section-title">Recent notes</div>
+      <div class="notes-list" id="notes-list">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ========== STATE ==========
+    const state = {
+      energy: null,
+      stress: null,
+      vibe: null
+    };
+
+    const labels = {
+      energy: ['Drained', 'Low', 'Okay', 'Good', 'Charged'],
+      stress: ['Light', 'Mild', 'Moderate', 'Heavy', 'Intense'],
+      vibe: ['Isolated', 'Quiet', 'Okay', 'Solid', 'Electric']
+    };
+
+    // ========== NAVIGATION ==========
+    function showView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+
+      if (id === 'manager') {
+        renderManager();
+      }
+      if (id === 'checkin') {
+        // reset form
+        state.energy = state.stress = state.vibe = null;
+        document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('energy-label').textContent = '—';
+        document.getElementById('stress-label').textContent = '—';
+        document.getElementById('vibe-label').textContent = '—';
+        document.getElementById('note').value = '';
+        document.getElementById('char-count').textContent = '0';
+        document.getElementById('submit-btn').disabled = true;
+      }
+    }
+
+    // ========== CHECK-IN LOGIC ==========
+    function selectScale(btn) {
+      const scale = btn.dataset.scale;
+      const value = parseInt(btn.dataset.value);
+
+      // deselect siblings
+      document.querySelectorAll(`.scale-btn[data-scale="${scale}"]`).forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      state[scale] = value;
+      document.getElementById(`${scale}-label`).textContent = labels[scale][value - 1];
+
+      // enable submit when all three are chosen
+      const ready = state.energy && state.stress && state.vibe;
+      document.getElementById('submit-btn').disabled = !ready;
+    }
+
+    function updateCharCount() {
+      const len = document.getElementById('note').value.length;
+      document.getElementById('char-count').textContent = len;
+    }
+
+    function submitCheckin() {
+      if (!state.energy || !state.stress || !state.vibe) return;
+
+      const entry = {
+        id: Date.now(),
+        energy: state.energy,
+        stress: state.stress,
+        vibe: state.vibe,
+        note: document.getElementById('note').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      const whispers = getWhispers();
+      whispers.unshift(entry);
+      // keep last 100
+      localStorage.setItem('shiftWhispers', JSON.stringify(whispers.slice(0, 100)));
+
+      showView('thanks');
+    }
+
+    // ========== DATA ==========
+    function getWhispers() {
+      try {
+        return JSON.parse(localStorage.getItem('shiftWhispers')) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function seedIfEmpty() {
+      const existing = getWhispers();
+      if (existing.length > 0) return;
+
+      // Seed with realistic sample data so the manager view looks alive
+      const samples = [
+        { energy: 4, stress: 2, vibe: 5, note: "New person on bar is crushing it", hoursAgo: 1 },
+        { energy: 3, stress: 4, vibe: 3, note: "Short-staffed after 8pm", hoursAgo: 2 },
+        { energy: 2, stress: 4, vibe: 2, note: "", hoursAgo: 3 },
+        { energy: 5, stress: 1, vibe: 5, note: "Quiet night, good team energy", hoursAgo: 4 },
+        { energy: 3, stress: 3, vibe: 4, note: "Kitchen is moving well", hoursAgo: 5 },
+        { energy: 2, stress: 5, vibe: 2, note: "Two call-outs tonight", hoursAgo: 6 },
+        { energy: 4, stress: 2, vibe: 4, note: "", hoursAgo: 8 },
+        { energy: 3, stress: 3, vibe: 3, note: "Training day – bit chaotic", hoursAgo: 10 },
+        { energy: 4, stress: 2, vibe: 5, note: "Regulars were lovely", hoursAgo: 12 },
+        { energy: 1, stress: 5, vibe: 1, note: "Absolutely slammed with no backup", hoursAgo: 14 },
+        { energy: 3, stress: 3, vibe: 4, note: "", hoursAgo: 16 },
+        { energy: 5, stress: 1, vibe: 5, note: "Best shift in weeks", hoursAgo: 18 },
+      ];
+
+      const now = Date.now();
+      const seeded = samples.map((s, i) => ({
+        id: now - (s.hoursAgo * 3600000),
+        energy: s.energy,
+        stress: s.stress,
+        vibe: s.vibe,
+        note: s.note,
+        timestamp: new Date(now - (s.hoursAgo * 3600000)).toISOString()
+      }));
+
+      localStorage.setItem('shiftWhispers', JSON.stringify(seeded));
+    }
+
+    // ========== MANAGER RENDER ==========
+    function renderManager() {
+      seedIfEmpty();
+      const whispers = getWhispers();
+
+      document.getElementById('total-whispers').textContent = whispers.length;
+
+      if (whispers.length === 0) {
+        document.getElementById('avg-energy').textContent = '—';
+        document.getElementById('avg-stress').textContent = '—';
+        document.getElementById('avg-vibe').textContent = '—';
+        document.getElementById('energy-desc').textContent = 'No data';
+        document.getElementById('stress-desc').textContent = 'No data';
+        document.getElementById('vibe-desc').textContent = 'No data';
+        document.getElementById('suggestions').innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">Not enough data yet for suggestions.</p>';
+        document.getElementById('notes-list').innerHTML = '<div class="empty-state">No notes yet. Whispers will appear here.</div>';
+        return;
+      }
+
+      // Averages
+      const avg = (key) => {
+        const sum = whispers.reduce((a, w) => a + w[key], 0);
+        return (sum / whispers.length).toFixed(1);
+      };
+
+      const e = parseFloat(avg('energy'));
+      const s = parseFloat(avg('stress'));
+      const v = parseFloat(avg('vibe'));
+
+      document.getElementById('avg-energy').textContent = e;
+      document.getElementById('avg-stress').textContent = s;
+      document.getElementById('avg-vibe').textContent = v;
+
+      document.getElementById('energy-desc').textContent = e >= 4 ? 'Strong' : e >= 3 ? 'Okay' : 'Low';
+      document.getElementById('stress-desc').textContent = s <= 2 ? 'Light' : s <= 3.5 ? 'Moderate' : 'High';
+      document.getElementById('vibe-desc').textContent = v >= 4 ? 'Good' : v >= 3 ? 'Okay' : 'Quiet';
+
+      // Suggestions
+      const suggestions = [];
+      if (s >= 3.8) {
+        suggestions.push({ icon: '⚠️', text: 'Stress is running high. Consider checking staffing levels or offering a short staggered break.' });
+      }
+      if (e <= 2.5) {
+        suggestions.push({ icon: '🔋', text: 'Energy is dipping. A quick mid-shift check-in or lighter task rotation could help.' });
+      }
+      if (v <= 2.5) {
+        suggestions.push({ icon: '🤝', text: 'Team vibe feels quiet. A small recognition moment or pairing people up might lift the floor.' });
+      }
+      if (e >= 4 && v >= 4 && s <= 2.5) {
+        suggestions.push({ icon: '✨', text: 'Strong energy and vibe with low stress — great time to recognize the team or try a small experiment.' });
+      }
+      if (suggestions.length === 0) {
+        suggestions.push({ icon: '👀', text: 'Pulse looks balanced. Keep an eye on the notes for early signals.' });
+      }
+
+      document.getElementById('suggestions').innerHTML = suggestions.map(sg => `
+        <div class="suggestion">
+          <span class="suggestion-icon">${sg.icon}</span>
+          <p>${sg.text}</p>
+        </div>
+      `).join('');
+
+      // Notes
+      const notes = whispers.filter(w => w.note && w.note.length > 0).slice(0, 8);
+      if (notes.length === 0) {
+        document.getElementById('notes-list').innerHTML = '<div class="empty-state">No notes shared yet.</div>';
+      } else {
+        document.getElementById('notes-list').innerHTML = notes.map(n => {
+          const time = new Date(n.timestamp);
+          const hours = Math.round((Date.now() - time.getTime()) / 3600000);
+          const timeStr = hours < 1 ? 'Just now' : hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+          return `
+            <div class="note-card">
+              “${n.note}”
+              <div class="meta">${timeStr}</div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // Init
+    seedIfEmpty();
+  </script>
+</body>
+</html>
